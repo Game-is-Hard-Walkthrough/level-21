@@ -43,3 +43,12 @@ This repo is meant to be dead simple:
    ```bash
    cd demo
    python3 -m http.server 8000
+Open your browser to:
+
+http://localhost:8000
+
+Demo controls
+
+Desktop: press Print Screen to trigger the “screenshot captured” win state.
+
+Mobile browsers can’t reliably detect hardware screenshots, so the demo includes a Simulate Screenshot button too.
