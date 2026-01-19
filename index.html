@@ -1,0 +1,273 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Game is Hard — Level 21 (Clone)</title>
+  <style>
+    :root{
+      --bg:#141414;
+      --panel:#1c1c1c;
+      --text:#e8e8e8;
+      --yellow:#ffd84d;
+      --green:#22c55e;
+      --muted:#a3a3a3;
+    }
+    *{box-sizing:border-box}
+    body{
+      margin:0;
+      font-family: system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif;
+      background: radial-gradient(1200px 600px at 50% 20%, #1f1f1f 0%, var(--bg) 55%);
+      color:var(--text);
+      height:100vh;
+      display:flex;
+      align-items:center;
+      justify-content:center;
+    }
+    .frame{
+      width:min(520px, 92vw);
+      height:min(780px, 92vh);
+      background: linear-gradient(180deg, #1b1b1b 0%, #111 100%);
+      border:1px solid #2a2a2a;
+      border-radius:24px;
+      position:relative;
+      box-shadow: 0 20px 60px rgba(0,0,0,.45);
+      overflow:hidden;
+    }
+    .topbar{
+      position:absolute;
+      inset:18px 18px auto 18px;
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      pointer-events:none;
+    }
+    .icon{
+      width:44px;
+      height:44px;
+      border-radius:999px;
+      background: rgba(255,255,255,.06);
+      border:1px solid rgba(255,255,255,.10);
+      display:grid;
+      place-items:center;
+      pointer-events:none;
+    }
+    .hamburger{
+      width:18px;
+      height:12px;
+      position:relative;
+    }
+    .hamburger span{
+      position:absolute;
+      left:0; right:0;
+      height:2px;
+      background: rgba(255,255,255,.70);
+      border-radius:2px;
+    }
+    .hamburger span:nth-child(1){top:0}
+    .hamburger span:nth-child(2){top:5px}
+    .hamburger span:nth-child(3){bottom:0}
+    .bulb{
+      width:18px;height:18px;border-radius:999px;
+      background: rgba(255,255,255,.70);
+      position:relative;
+    }
+    .bulb:after{
+      content:"";
+      position:absolute;
+      left:50%; transform:translateX(-50%);
+      bottom:-5px;
+      width:10px; height:6px;
+      border-radius:2px;
+      background: rgba(255,255,255,.55);
+    }
+
+    .center{
+      position:absolute;
+      inset:0;
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      flex-direction:column;
+      gap:18px;
+      padding:24px;
+      text-align:center;
+    }
+    .prompt{
+      font-size:44px;
+      font-weight:800;
+      letter-spacing:.5px;
+      color:var(--yellow);
+      text-transform:lowercase;
+      margin-top:-40px;
+    }
+    .sub{
+      max-width:420px;
+      color:var(--muted);
+      line-height:1.35;
+      font-size:14px;
+    }
+    .controls{
+      display:flex;
+      gap:10px;
+      flex-wrap:wrap;
+      align-items:center;
+      justify-content:center;
+      margin-top:8px;
+    }
+    button{
+      border:1px solid rgba(255,255,255,.12);
+      background: rgba(255,255,255,.06);
+      color:var(--text);
+      padding:10px 14px;
+      border-radius:12px;
+      cursor:pointer;
+      font-weight:700;
+    }
+    button:hover{ background: rgba(255,255,255,.10); }
+
+    .play{
+      display:none;
+      margin-top:6px;
+      width:76px;
+      height:76px;
+      border-radius:999px;
+      border:none;
+      background: var(--green);
+      box-shadow: 0 12px 30px rgba(34,197,94,.25);
+      position:relative;
+      cursor:pointer;
+    }
+    .play:before{
+      content:"";
+      position:absolute;
+      left:30px;
+      top:24px;
+      width:0;height:0;
+      border-top:14px solid transparent;
+      border-bottom:14px solid transparent;
+      border-left:22px solid rgba(0,0,0,.65);
+    }
+
+    .toast{
+      position:absolute;
+      left:50%;
+      bottom:18px;
+      transform:translateX(-50%);
+      background: rgba(0,0,0,.55);
+      border:1px solid rgba(255,255,255,.12);
+      padding:10px 12px;
+      border-radius:12px;
+      font-size:13px;
+      color:rgba(255,255,255,.85);
+      display:none;
+      max-width:90%;
+      text-align:center;
+    }
+
+    .cleared{
+      display:none;
+      margin-top:10px;
+      font-weight:800;
+      color:#d1fae5;
+    }
+  </style>
+</head>
+<body>
+  <div class="frame" role="application" aria-label="Level 21 demo">
+    <div class="topbar">
+      <div class="icon" aria-hidden="true">
+        <div class="hamburger">
+          <span></span><span></span><span></span>
+        </div>
+      </div>
+      <div class="icon" aria-hidden="true">
+        <div class="bulb"></div>
+      </div>
+    </div>
+
+    <div class="center">
+      <div class="prompt">say cheese!</div>
+
+      <div class="sub">
+        Desktop: press <b>Print Screen</b> to simulate the game detecting a screenshot.<br/>
+        Mobile browsers won’t reliably expose screenshot events, so use the button below.
+      </div>
+
+      <div class="controls">
+        <button id="simulate">Simulate Screenshot</button>
+        <button id="reset">Reset</button>
+      </div>
+
+      <button id="play" class="play" aria-label="Play"></button>
+      <div id="cleared" class="cleared">Level cleared. GG.</div>
+    </div>
+
+    <div id="toast" class="toast"></div>
+  </div>
+
+  <script>
+    const playBtn = document.getElementById('play');
+    const simulateBtn = document.getElementById('simulate');
+    const resetBtn = document.getElementById('reset');
+    const toast = document.getElementById('toast');
+    const cleared = document.getElementById('cleared');
+
+    let screenshotCaptured = false;
+
+    function showToast(msg){
+      toast.textContent = msg;
+      toast.style.display = 'block';
+      clearTimeout(showToast._t);
+      showToast._t = setTimeout(() => toast.style.display = 'none', 1600);
+    }
+
+    function onScreenshotCaptured(){
+      if (screenshotCaptured) return;
+      screenshotCaptured = true;
+
+      playBtn.style.display = 'inline-block';
+      showToast('Screenshot detected. Tap the green Play button.');
+    }
+
+    function reset(){
+      screenshotCaptured = false;
+      playBtn.style.display = 'none';
+      cleared.style.display = 'none';
+      showToast('Reset.');
+    }
+
+    // Desktop-friendly: detect Print Screen (best-effort).
+    window.addEventListener('keydown', (e) => {
+      const k = (e.key || '').toLowerCase();
+
+      // Windows often reports "PrintScreen". Some browsers do.
+      if (e.key === 'PrintScreen' || k === 'printscreen') {
+        onScreenshotCaptured();
+        return;
+      }
+
+      // Extra fallback: Ctrl+Shift+S (common “save/screenshot” muscle memory)
+      if (e.ctrlKey && e.shiftKey && (k === 's')) {
+        onScreenshotCaptured();
+      }
+    });
+
+    simulateBtn.addEventListener('click', onScreenshotCaptured);
+
+    playBtn.addEventListener('click', () => {
+      if (!screenshotCaptured) {
+        showToast('No screenshot yet.');
+        return;
+      }
+      cleared.style.display = 'block';
+      showToast('Win.');
+    });
+
+    resetBtn.addEventListener('click', reset);
+
+    // Start clean
+    reset();
+  </script>
+</body>
+</html>
